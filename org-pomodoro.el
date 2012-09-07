@@ -17,6 +17,7 @@
 (defvar org-pomodoro-timer-start 0)
 (defvar org-pomodoro-phase :none)
 (defvar org-pomodoro-length-minutes 25)
+(defvar org-pomodoro-break-length-minutes 5)
 (defvar org-pomodoro-mode-line "")
 (put 'org-pomodoro-mode-line 'risky-local-variable t)
 
