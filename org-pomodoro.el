@@ -42,11 +42,9 @@
        ))
   )
 
-(defun org-pomodoro-minutes-elapsed-text ()
-  (let ((hms (org-timer-secs-to-hms 
-	      (org-pomodoro-seconds-elapsed))))
-    (substring hms (- (length hms) 5))
-    ))
+(defun org-pomodoro-minutes-remaining-text (period)
+  (let ((hms (org-timer-secs-to-hms (- period (org-pomodoro-seconds-elapsed)))))
+    (substring hms (- (length hms) 5))))
 
 (defun org-pomodoro-update-mode-line ()
   (setq org-pomodoro-mode-line
@@ -54,10 +52,10 @@
 	 ((eq org-pomodoro-phase :none) "")
 	 ((eq org-pomodoro-phase :pomodoro)  
 	  (propertize 
-	   (format "(%s)" (org-pomodoro-minutes-elapsed-text)) 
+	   (format "(%s)" (org-pomodoro-minutes-remaining-text (* 60 org-pomodoro-length-minutes))) 
 	   'face 'org-pomodoro-mode-line) )
 	 ((eq org-pomodoro-phase :break) 
-	  (propertize (format "[break %s]" (org-pomodoro-minutes-elapsed-text))
+	  (propertize (format "[break %s]" (org-pomodoro-minutes-remaining-text (* 60 org-pomodoro-break-length-minutes)))
 		      'face 'org-pomodoro-update-mode-line))
 	 ))
   (force-mode-line-update))
@@ -76,17 +74,17 @@
     (progn
 ;      (message "%s %s" org-pomodoro-phase (org-pomodoro-seconds-elapsed))
       (when (> (org-pomodoro-seconds-elapsed) (* 60 org-pomodoro-length-minutes))
-	(notify "Pomodoro completed! Time for a break!")
+	(notify "Pomodoro completed!" "Time for a break!")
 	(org-pomodoro-start :break)
 	(run-hooks 'org-pomodoro-done-hook))
       (org-pomodoro-update-mode-line)))
    ((eq org-pomodoro-phase :break)
     (progn 
-      (when (> (org-pomodoro-seconds-elapsed) (* 60 5))
-	(notify "Break is over, ready for another one?")
+      (when (> (org-pomodoro-seconds-elapsed) (* 60 org-pomodoro-break-length-minutes))
+	(notify "Break is over" "Ready for another one?")
 	(progn 
 	  (org-pomodoro-kill)
-	  (notify "You've smashed the pomodoro")
+	  (message "You've smashed the pomodoro")
 	  ))
       (org-pomodoro-update-mode-line)))))
 
@@ -120,7 +118,7 @@
 	)
     (if (y-or-n-p "You are already doing a pomodoro. Would You like to stop it?")
 	(org-pomodoro-kill)
-      (notify "Alright, keep up the good work!")
+      (message "Alright, keep up the good work!")
 	)))
 
 ;; (add-hook 'org-clock-in-hook '(lambda () 
