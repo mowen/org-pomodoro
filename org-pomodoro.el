@@ -31,16 +31,12 @@
       (when (not (memq 'org-pomodoro-mode-line global-mode-string))
 	(setq global-mode-string 
 	      (append global-mode-string '(org-pomodoro-mode-line))))
-      (setq global-mode-string (delq 'org-pomodoro-mode-line global-mode-string))
-      )
-  (force-mode-line-update)
-  )
+      (setq global-mode-string (delq 'org-pomodoro-mode-line global-mode-string)))
+  (force-mode-line-update))
 
 (defun org-pomodoro-seconds-elapsed ()
   (round (- (org-float-time (current-time))
-       (org-float-time org-pomodoro-timer-start)
-       ))
-  )
+       (org-float-time org-pomodoro-timer-start))))
 
 (defun org-pomodoro-minutes-remaining-text (period)
   (let ((hms (org-timer-secs-to-hms (- period (org-pomodoro-seconds-elapsed)))))
@@ -56,15 +52,13 @@
 	   'face 'org-pomodoro-mode-line) )
 	 ((eq org-pomodoro-phase :break) 
 	  (propertize (format "[break %s]" (org-pomodoro-minutes-remaining-text (* 60 org-pomodoro-break-length-minutes)))
-		      'face 'org-pomodoro-update-mode-line))
-	 ))
+		      'face 'org-pomodoro-update-mode-line))))
   (force-mode-line-update))
 
 (defun org-pomodoro-kill ()
   (cancel-timer org-pomodoro-timer)
   (org-pomodoro-set-mode-line nil)
-  (setq org-pomodoro-phase :none)
-  )
+  (setq org-pomodoro-phase :none))
 
 (defun org-pomodoro-heartbeat ()
   (cond
@@ -84,8 +78,7 @@
 	(notify "Break is over" "Ready for another one?")
 	(progn 
 	  (org-pomodoro-kill)
-	  (message "You've smashed the pomodoro")
-	  ))
+	  (message "You've smashed the pomodoro")))
       (org-pomodoro-update-mode-line)))))
 
 (defun org-pomodoro-start (what)
@@ -94,8 +87,7 @@
   (org-pomodoro-set-mode-line t)
   (setq org-pomodoro-phase what
 	org-pomodoro-timer-start (current-time)
-	org-pomodoro-timer (run-with-timer 1 1 'org-pomodoro-heartbeat))
-  )
+	org-pomodoro-timer (run-with-timer 1 1 'org-pomodoro-heartbeat)))
 
 ;;; These names are not so great.
 (defvar org-pomodoro-done-hook nil)
@@ -112,14 +104,11 @@
 	(if (eq major-mode 'org-mode)
 	    (call-interactively 'org-clock-in)
 	  (let ((current-prefix-arg '(4)))
-	    (call-interactively 'org-clock-in))
-	  )
-	(org-pomodoro-start :pomodoro)
-	)
+	    (call-interactively 'org-clock-in)))
+	(org-pomodoro-start :pomodoro))
     (if (y-or-n-p "You are already doing a pomodoro. Would You like to stop it?")
 	(org-pomodoro-kill)
-      (message "Alright, keep up the good work!")
-	)))
+      (message "Alright, keep up the good work!"))))
 
 ;; (add-hook 'org-clock-in-hook '(lambda () 
 ;;       (if (not org-timer-last-timer) 
