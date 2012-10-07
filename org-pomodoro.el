@@ -16,8 +16,14 @@
 (defvar org-pomodoro-timer nil)
 (defvar org-pomodoro-timer-start 0)
 (defvar org-pomodoro-phase :none)
+
 (defvar org-pomodoro-length-minutes 25)
 (defvar org-pomodoro-break-length-minutes 5)
+
+(defvar org-pomodoro-current-task-heading "Current Task")
+(defvar org-pomodoro-todo-today-heading "To Do Today")
+(defvar org-pomodoro-activity-inventory-heading "Activity Inventory")
+
 (defvar org-pomodoro-mode-line "")
 (put 'org-pomodoro-mode-line 'risky-local-variable t)
 
@@ -89,6 +95,27 @@
   (setq org-pomodoro-phase what
 	org-pomodoro-timer-start (current-time)
 	org-pomodoro-timer (run-with-timer 1 1 'org-pomodoro-heartbeat)))
+
+(defun org-pomodoro-refile-current ()
+  (interactive)
+  (org-pomodoro-refile org-pomodoro-current-task-heading))
+
+(defun org-pomodoro-refile-todo-today ()
+  (interactive)
+  (org-pomodoro-refile org-pomodoro-todo-today-heading))
+
+(defun org-pomodoro-refile-activity-inventory ()
+  (interactive)
+  (org-pomodoro-refile org-pomodoro-activity-inventory-heading))
+
+(defun org-pomodoro-refile (refile-heading)
+  "Move the heading at point to the heading specified."
+  (beginning-of-line)
+  (org-cut-special)
+  (if (not (re-search-forward refile-heading nil t))
+      (re-search-backward refile-heading nil t))
+  ;; If the search for the heading failed, past back into original position
+  (org-paste-special))
 
 ;;; These names are not so great.
 (defvar org-pomodoro-done-hook nil)
