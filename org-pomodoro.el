@@ -117,6 +117,13 @@
   ;; If the search for the heading failed, past back into original position
   (org-paste-special))
 
+(defun org-pomodoro-find-latest-date ()
+  "Move point to the latest date heading."
+  (interactive)
+  (let ((date-heading-regex "*** \\[.\\{4\\}-.\\{2\\}-.\\{2\\} .\\{3\\}\\]"))
+    (goto-char 1)
+    (re-search-forward date-heading-regex)))
+
 ;;; These names are not so great.
 (defvar org-pomodoro-done-hook nil)
 ;;(defvar org-pomodoro-break-hook nil)
