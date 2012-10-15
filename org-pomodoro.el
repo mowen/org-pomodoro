@@ -90,6 +90,13 @@
 	org-pomodoro-timer-start (current-time)
 	org-pomodoro-timer (run-with-timer 1 1 'org-pomodoro-heartbeat)))
 
+(defun org-pomodoro-find-latest-date ()
+  "Move point to the latest date heading."
+  (interactive)
+  (let ((date-heading-regex "*** \\[.\\{4\\}-.\\{2\\}-.\\{2\\} .\\{3\\}\\]"))
+    (goto-char 1)
+    (re-search-forward date-heading-regex)))
+
 ;;; These names are not so great.
 (defvar org-pomodoro-done-hook nil)
 ;;(defvar org-pomodoro-break-hook nil)
