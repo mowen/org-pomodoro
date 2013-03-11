@@ -7,24 +7,8 @@
 
 ;; org-make-org-heading-search-string will make a search string for a heading or string
 
-;; New property-based version
-
-(defconst org-pomodoro-estimated "estimated-pomodoros")
-(defconst org-pomodoro-completed "completed-pomodoros")
-
 (defun org-pomodoro-kill ()
   (cancel-timer org-pomodoro-timer)
   (org-pomodoro-set-mode-line nil)
   (setq org-pomodoro-phase :none))
 
-(defun org-pomodoro-set-estimate (estimated-pomodoros)
-  (interactive "nNumber of pomodoros? ")
-  (org-set-property org-pomodoro-estimated (number-to-string estimated-pomodoros))
-  (org-set-property org-pomodoro-completed "0"))
-
-(defun org-pomodoro-get-estimate ()
-  (org-read-property-value org-pomodoro-estimated))
-
-(defun org-pomodoro-delete-estimate ()
-  (org-delete-property org-pomodoro-estimated)
-  (org-delete-property org-pomodoro-completed))

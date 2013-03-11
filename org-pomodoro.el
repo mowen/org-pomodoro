@@ -6,8 +6,7 @@
 (require 'timer)
 (require 'org)
 (require 'org-timer)
-
-(autoload 'notify "notify" "Notify TITLE, BODY.")
+(require 'alert)
 
 (defgroup org-pomodoro nil "Org pomodoro customization"
   :tag "Org Pomodoro"
@@ -31,6 +30,9 @@
   '((t (:foreground "tomato1")))
   "Org Pomodoro mode line color"
   :group 'faces)
+
+(defconst org-pomodoro-estimated "estimated-pomodoros")
+(defconst org-pomodoro-completed "completed-pomodoros")
 
 (defun org-pomodoro-set-mode-line (enable?)
   (or global-mode-string (setq global-mode-string '("")))
@@ -63,6 +65,7 @@
   (force-mode-line-update))
 
 (defun org-pomodoro-kill ()
+  (mo-log "Kill Pomodoro" 'debug)
   (cancel-timer org-pomodoro-timer)
   (org-pomodoro-set-mode-line nil)
   (setq org-pomodoro-phase :none))
@@ -71,30 +74,43 @@
   (cond
    ((and (eq org-pomodoro-phase :none) org-pomodoro-timer) 
     (cancel-timer org-pomodoro-timer))
-   ((eq org-pomodoro-phase :pomodoro) 
+   ((eq org-pomodoro-phase :pomodoro)
     (progn
-;      (message "%s %s" org-pomodoro-phase (org-pomodoro-seconds-elapsed))
+      (mo-log (format "%s %s" org-pomodoro-phase (org-pomodoro-seconds-elapsed)) 'debug)
       (when (> (org-pomodoro-seconds-elapsed) (* 60 org-pomodoro-length-minutes))
-	(notify "Pomodoro completed!" "Time for a break!")
+        (alert-message-notify "Pomodoro completed!" "Time for a break!"))
 	(org-pomodoro-start :break)
 	(run-hooks 'org-pomodoro-done-hook))
       (org-pomodoro-update-mode-line)))
    ((eq org-pomodoro-phase :break)
     (progn 
       (when (> (org-pomodoro-seconds-elapsed) (* 60 org-pomodoro-break-length-minutes))
-	(notify "Break is over" "Ready for another one?")
+        (alert-message-notify "Break is over" "Ready for another one?")
 	(progn 
 	  (org-pomodoro-kill)
 	  (message "You've smashed the pomodoro")))
-      (org-pomodoro-update-mode-line)))))
+      (org-pomodoro-update-mode-line))))
 
 (defun org-pomodoro-start (what)
+  (mo-log "Timer starting." 'debug)
   (when org-pomodoro-timer 
     (cancel-timer org-pomodoro-timer))
   (org-pomodoro-set-mode-line t)
   (setq org-pomodoro-phase what
 	org-pomodoro-timer-start (current-time)
 	org-pomodoro-timer (run-with-timer 1 1 'org-pomodoro-heartbeat)))
+
+(defun org-pomodoro-set-estimate (estimated-pomodoros)
+  (interactive "nNumber of pomodoros? ")
+  (org-set-property org-pomodoro-estimated (number-to-string estimated-pomodoros))
+  (org-set-property org-pomodoro-completed "0"))
+
+(defun org-pomodoro-get-estimate ()
+  (org-read-property-value org-pomodoro-estimated))
+
+(defun org-pomodoro-delete-estimate ()
+  (org-delete-property org-pomodoro-estimated)
+  (org-delete-property org-pomodoro-completed))
 
 (defun org-pomodoro-refile-current ()
   (interactive)
@@ -124,9 +140,10 @@
     (goto-char 1)
     (re-search-forward date-heading-regex)))
 
-;;; These names are not so great.
+(defun org-pomodoro-current-date-regex (current-time)
+  (format-time-string "\\[%Y-%m-%d %a\\]" current-time))
+
 (defvar org-pomodoro-done-hook nil)
-;;(defvar org-pomodoro-break-hook nil)
 
 (add-hook 'org-pomodoro-done-hook
 	  '(lambda () 
@@ -144,9 +161,5 @@
     (if (y-or-n-p "You are already doing a pomodoro. Would You like to stop it?")
 	(org-pomodoro-kill)
       (message "Alright, keep up the good work!"))))
-
-;; (add-hook 'org-clock-in-hook '(lambda () 
-;;       (if (not org-timer-last-timer) 
-;; 	  (org-timer-set-timer "25"))))
 
 (provide 'org-pomodoro)
