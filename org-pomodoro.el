@@ -126,12 +126,23 @@
 
 (defun org-pomodoro-refile (refile-heading)
   "Move the heading at point to the heading specified."
-  (beginning-of-line)
-  (org-cut-special)
-  (if (not (re-search-forward refile-heading nil t))
-      (re-search-backward refile-heading nil t))
-  ;; If the search for the heading failed, past back into original position
-  (org-paste-special))
+  (let ((match-found nil)
+        (paste-location (point)))
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward refile-heading nil t)
+          (progn
+            (backward-char)
+            (setq match-found t
+                  paste-location (point)))))
+    (if match-found
+        (progn
+          (beginning-of-line)
+          (org-cut-subtree)
+          (goto-char paste-location)
+          (end-of-line)
+          (mo-log (org-point-at-end-of-empty-headline) 'debug)
+          (org-paste-subtree)))))
 
 (defun org-pomodoro-find-latest-date ()
   "Move point to the latest date heading."
