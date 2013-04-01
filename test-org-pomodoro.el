@@ -23,7 +23,6 @@
     (forward-char 3)
     (org-pomodoro-refile "Activity Inventory")
     (search-forward "test 2")
-    (mo-log (buffer-substring (point-min) (point-max)))
     (should (= 83 (point)))))
 
 (ert-deftest org-pomodoro-refile-up ()
