@@ -128,9 +128,12 @@
   "Move the heading at point to the heading specified."
   (save-excursion
     (beginning-of-line)
-    (let ((copy-points (list (point))))
+    (let ((heading-regex (concat "^*\\{1,"
+                                 (number-to-string (1- (org-current-level)))
+                                 "\\} "))
+          (copy-points (list (point))))
       (re-search-forward "*\*") ;; skip headline of current heading
-      (re-search-forward "*")   ;; find the headline of the next heading
+      (re-search-forward heading-regex nil t) ;; find the headline of the next sibling or parent
       (re-search-backward "\n") ;; back to previous line
       (setq copy-points (append copy-points (point)))
       (goto-char (point-min))
